@@ -9,5 +9,5 @@ urlpatterns = [
     path('registration/', views.CreateUser.as_view(), name="registration"),
     path('login/', views.CustomAuthToken.as_view(), name="login"),
     path('users/', views.ListUser.as_view(), name="list"),
-    # path('logout/', views.Logout.as_view(), name="logout")
+    path('logout/', views.Logout.as_view(), name="logout")
 ]

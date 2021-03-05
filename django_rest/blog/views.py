@@ -23,7 +23,6 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 
 
-
 class BlogList(generics.ListCreateAPIView):
 
     permission_classes=[IsAuthenticated]
@@ -65,8 +64,6 @@ class CreateUser(generics.CreateAPIView):
     
     
 
-    
-
 class ListUser(APIView):
     permission_classes=[IsAuthenticated]
 
@@ -77,9 +74,6 @@ class ListUser(APIView):
 class CustomAuthToken(generics.CreateAPIView):
     serializer_class=AuthTokenSerializer
 
-    
-    
-    
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                         context={'request': request})
