@@ -1,13 +1,14 @@
 from django import http
 from django.contrib.auth.models import User
+from django.contrib.auth import logout
 from django.shortcuts import render
 from rest_framework import serializers
 from rest_framework import views
 from rest_framework.serializers import Serializer
 from rest_framework.settings import import_from_string
-from .models import Blog
+from .models import Author, Blog
 from django.http import HttpResponse, Http404, response
-from .serializers import BlogSerializer,RegisterSerializer
+from .serializers import BlogSerializer,RegisterSerializer,AuthorSerializer
 from rest_framework import status,permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -25,9 +26,20 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 class BlogList(generics.ListCreateAPIView):
 
-    permission_classes=[IsAuthenticated]
+    # permission_classes=[IsAuthenticated]
     queryset=Blog.objects.all()
     serializer_class=BlogSerializer
+    
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+    
+    
+
+class AuthorList(generics.ListCreateAPIView):
+
+    # permission_classes=[IsAuthenticated]
+    queryset=Author.objects.all()
+    serializer_class=AuthorSerializer
 
 
 class BlogDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -44,7 +56,6 @@ class BlogDetail(generics.RetrieveUpdateDestroyAPIView):
         return super(BlogDetail, self).handle_exception(exc)
 
 
-    
 
 class CreateUser(generics.CreateAPIView):
     permission_classes=[AllowAny]
@@ -56,10 +67,10 @@ class CreateUser(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         token, _ = Token.objects.get_or_create(user=user)
-
+        
         return Response({
-        "user": RegisterSerializer(user, context=self.get_serializer_context()).data, 
-        "token": token.key
+            "user": serializer.data, 
+            "token": token.key
         })
     
     
@@ -89,4 +100,4 @@ class CustomAuthToken(generics.CreateAPIView):
 class Logout(APIView):
     def get(self, request, format=None):
         request.user.auth_token.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)

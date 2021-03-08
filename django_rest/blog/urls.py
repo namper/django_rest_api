@@ -5,6 +5,7 @@ app_name="blog"
 
 urlpatterns = [
     path('', views.BlogList.as_view(), name="blog-list"),
+    path('author/', views.AuthorList.as_view(), name="author-list"),
     path('<int:pk>/', views.BlogDetail.as_view(), name="blog-detail"),
     path('registration/', views.CreateUser.as_view(), name="registration"),
     path('login/', views.CustomAuthToken.as_view(), name="login"),
