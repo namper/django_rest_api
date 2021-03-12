@@ -1,19 +1,20 @@
 import email
 from django.core.management.color import Style
-from .models import Blog,Category,Tag,Comment
+from app.models import Blog,Category,Tag,Commen
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    
+    blog = SerializerMethodField()
+    def get_blog(self, obj):
+        return obj.blog.name
+    
     class Meta:
         model=Comment
         fields=['id','comment', 'created', 'blog']
-
-    def to_representation(self, instance):
-        rep = super(CommentSerializer, self).to_representation(instance)
-        rep['blog'] = instance.blog.name
-        return rep
+        
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,10 +30,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class BlogSerializer(serializers.ModelSerializer):
     # tag=TagSerializer(many=True,read_only=True)
-    active_blog=serializers.SerializerMethodField()
 
-    def get_active_blog(self,obj):
-        return Blog.objects.filter(is_active=True).count()
 
     class Meta:
         model = Blog
