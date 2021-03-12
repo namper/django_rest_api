@@ -1,35 +1,55 @@
 import email
 from django.core.management.color import Style
-from .models import Blog,Author
+from .models import Blog,Category,Tag,Comment
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
 
-
-class AuthorSerializer(serializers.ModelSerializer):
-
-
+class CommentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Author
-        fields = ['id', 'first_name', 'last_name']
+        model=Comment
+        fields=['id','comment', 'created', 'blog']
+
+    def to_representation(self, instance):
+        rep = super(CommentSerializer, self).to_representation(instance)
+        rep['blog'] = instance.blog.name
+        return rep
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Tag
+        fields=['id','title']
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Category
+        fields=['id','title']
 
 
 
 class BlogSerializer(serializers.ModelSerializer):
-    
-    
+    # tag=TagSerializer(many=True,read_only=True)
+    active_blog=serializers.SerializerMethodField()
+
+    def get_active_blog(self,obj):
+        return Blog.objects.filter(is_active=True).count()
+
     class Meta:
         model = Blog
-        fields = ['id',  'name', 'author_name']
+        fields = ['id',  'name', 'is_active', 'author_name','category','tag','active_blog']
+
 
     def to_representation(self, instance):
-        self.fields['author_name'] = AuthorSerializer()
-        return super(BlogSerializer, self).to_representation(instance)
+        rep = super(BlogSerializer, self).to_representation(instance)
+        rep['author_name'] = instance.author_name.username
+        rep['category']=instance.category.title
 
-    
+        return rep
+
+
 
 class RegisterSerializer(serializers.ModelSerializer):
-    
+
     password = serializers.CharField(write_only=True, required=True,)
     password2 = serializers.CharField(write_only=True, required=True)
 
@@ -48,10 +68,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email']
-            
+
         )
 
-        
         user.set_password(validated_data['password'])
         user.save()
 
